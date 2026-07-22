@@ -1,0 +1,14 @@
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';import { MatIconModule } from '@angular/material/icon';import { MatTableModule } from '@angular/material/table';import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';import { MatFormFieldModule } from '@angular/material/form-field';import { MatInputModule } from '@angular/material/input';import { MatSelectModule } from '@angular/material/select';import { MatSnackBar } from '@angular/material/snack-bar';
+import { debounceTime } from 'rxjs';
+import { TaskService } from '../services/task.service';import { Task } from '../interfaces/task.interface';import { TASK_STATUS_OPTIONS, TaskStatus } from '../models/task-status.model';
+@Component({selector:'app-task-list-page', standalone:true, imports:[CommonModule,ReactiveFormsModule,RouterLink,MatButtonModule,MatIconModule,MatTableModule,MatProgressSpinnerModule,MatPaginatorModule,MatFormFieldModule,MatInputModule,MatSelectModule], templateUrl:'./task-list-page.component.html', styleUrl:'./task-list-page.component.scss'})
+export class TaskListPageComponent implements OnInit { private readonly service=inject(TaskService); private readonly snackBar=inject(MatSnackBar); readonly displayedColumns=['title','status','createdAt','actions']; readonly statusOptions=TASK_STATUS_OPTIONS; readonly titleControl=new FormControl('',{nonNullable:true}); readonly statusControl=new FormControl<TaskStatus | ''>('',{nonNullable:true}); readonly tasks=signal<Task[]>([]); readonly loading=signal(false); readonly totalElements=signal(0); readonly page=signal(0); readonly size=signal(10); readonly isEmpty=computed(()=>!this.loading() && this.tasks().length===0);
+ ngOnInit(): void { this.load(); this.titleControl.valueChanges.pipe(debounceTime(400)).subscribe(()=>this.resetAndLoad()); this.statusControl.valueChanges.subscribe(()=>this.resetAndLoad()); }
+ load(): void { this.loading.set(true); const status=this.statusControl.value || undefined; this.service.findAll(this.page(),this.size(),this.titleControl.value,status).subscribe({next:p=>{this.tasks.set(p.content);this.totalElements.set(p.totalElements);this.loading.set(false);},error:()=>this.loading.set(false)}); }
+ onPage(event: PageEvent): void { this.page.set(event.pageIndex); this.size.set(event.pageSize); this.load(); }
+ delete(task: Task): void { if(!confirm(`Excluir a tarefa "${task.title}"?`)) return; this.service.delete(task.id).subscribe(()=>{this.snackBar.open('Tarefa excluída com sucesso','Fechar',{duration:3000}); this.load();}); }
+ private resetAndLoad(): void { this.page.set(0); this.load(); }}
