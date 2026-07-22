@@ -1,0 +1,7 @@
+package com.example.todolist.service;
+
+import com.example.todolist.dto.*;import com.example.todolist.entity.Task;import com.example.todolist.enums.TaskStatus;import com.example.todolist.mapper.TaskMapper;import com.example.todolist.repository.TaskRepository;import com.example.todolist.service.impl.TaskServiceImpl;import org.junit.jupiter.api.*;import org.junit.jupiter.api.extension.ExtendWith;import org.mockito.*;import org.mockito.junit.jupiter.MockitoExtension;import java.util.Optional;import static org.assertj.core.api.Assertions.*;import static org.mockito.Mockito.*;
+@ExtendWith(MockitoExtension.class)
+class TaskServiceImplTest { @Mock TaskRepository repository; @Mock TaskMapper mapper; @InjectMocks TaskServiceImpl service;
+ @Test void shouldCreateTask(){ var req=new TaskRequestDTO("Title","Desc",TaskStatus.PENDING); var entity=Task.builder().title("Title").status(TaskStatus.PENDING).build(); var saved=Task.builder().id(1L).title("Title").status(TaskStatus.PENDING).build(); var res=new TaskResponseDTO(1L,"Title","Desc",TaskStatus.PENDING,null,null); when(mapper.toEntity(req)).thenReturn(entity); when(repository.save(entity)).thenReturn(saved); when(mapper.toResponse(saved)).thenReturn(res); assertThat(service.create(req).id()).isEqualTo(1L); }
+ @Test void shouldThrowWhenNotFound(){ when(repository.findById(99L)).thenReturn(Optional.empty()); assertThatThrownBy(() -> service.findById(99L)).hasMessageContaining("Task not found"); }}
