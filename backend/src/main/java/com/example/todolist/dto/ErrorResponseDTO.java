@@ -1,6 +1,0 @@
-package com.example.todolist.dto;
-
-import java.time.LocalDateTime;
-import java.util.Map;
-
-public record ErrorResponseDTO(LocalDateTime timestamp, int status, String error, String message, String path, Map<String, String> fields) {}
