@@ -1,0 +1,166 @@
+<div class="page-container">
+<!-- Page Header -->
+<section class="page-header" aria-labelledby="page-title">
+  <div class="page-header__text">
+    <h1 id="page-title" class="page-header__title">Minhas Tarefas</h1>
+    <p class="page-header__subtitle">
+      Organize, priorize e acompanhe seu progresso.
+    </p>
+  </div>
+</section>
+
+<!-- Stats Dashboard -->
+<app-task-stats
+  [stats]="store.stats()"
+  [loading]="store.statsLoading()" />
+
+<!-- Filters Bar -->
+<app-task-filters
+  [viewMode]="viewMode()"
+  (filterChange)="onFilterChange($event)"
+  (viewModeChange)="onViewModeChange($event)" />
+
+<!-- ---- Loading Skeletons ---- -->
+@if (store.loading()) {
+  <app-skeleton
+    [variant]="viewMode() === 'card' ? 'card' : 'row'"
+    [count]="store.size()" />
+}
+
+<!-- ---- Empty State ---- -->
+@if (store.isEmpty()) {
+  <app-empty-state
+    icon="task_alt"
+    title="Nenhuma tarefa encontrada"
+    [message]="store.titleFilter() || store.statusFilter()
+      ? 'Tente ajustar os filtros ou limpar a busca.'
+      : 'Comece criando sua primeira tarefa clicando no botão acima.'"
+    ctaLabel="Criar primeira tarefa"
+    ctaRoute="/tasks/new" />
+}
+
+<!-- ---- CARD VIEW ---- -->
+@if (!store.loading() && !store.isEmpty() && viewMode() === 'card') {
+  <div
+    class="task-grid"
+    [@cardsAnim]="store.tasks().length"
+    role="list"
+    aria-label="Lista de tarefas em cards">
+    @for (task of store.tasks(); track trackById($index, task)) {
+      <div class="task-card-wrapper" role="listitem">
+        <app-task-card
+          [task]="task"
+          (delete)="confirmDelete($event)" />
+      </div>
+    }
+  </div>
+}
+
+<!-- ---- TABLE VIEW ---- -->
+@if (!store.loading() && !store.isEmpty() && viewMode() === 'table') {
+  <div class="table-container" role="region" aria-label="Lista de tarefas em tabela">
+    <table
+      mat-table
+      [dataSource]="store.tasks()"
+      class="task-table"
+      aria-label="Tarefas">
+
+      <!-- Title Column -->
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef>
+          <button class="sort-btn" (click)="onSort('title')" aria-label="Ordenar por título">
+            Título
+            @if (store.sortField() === 'title') {
+              <mat-icon class="sort-icon">{{ sortIcon }}</mat-icon>
+            }
+          </button>
+        </th>
+        <td mat-cell *matCellDef="let task">
+          <div class="table-title">
+            <span class="table-title__text">{{ task.title }}</span>
+            @if (task.description) {
+              <span class="table-title__desc">{{ task.description }}</span>
+            }
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let task">
+          <app-chip [status]="task.status" />
+        </td>
+      </ng-container>
+
+      <!-- Created At Column -->
+      <ng-container matColumnDef="createdAt">
+        <th mat-header-cell *matHeaderCellDef>
+          <button class="sort-btn" (click)="onSort('createdAt')" aria-label="Ordenar por data de criação">
+            Criado em
+            @if (store.sortField() === 'createdAt') {
+              <mat-icon class="sort-icon">{{ sortIcon }}</mat-icon>
+            }
+          </button>
+        </th>
+        <td mat-cell *matCellDef="let task">
+          <span [matTooltip]="task.createdAt | date:'dd/MM/yyyy HH:mm'">
+            {{ task.createdAt | relativeDate }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Updated At Column -->
+      <ng-container matColumnDef="updatedAt">
+        <th mat-header-cell *matHeaderCellDef>Atualizado</th>
+        <td mat-cell *matCellDef="let task">
+          <span [matTooltip]="task.updatedAt | date:'dd/MM/yyyy HH:mm'">
+            {{ task.updatedAt | relativeDate }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="actions-col">Ações</th>
+        <td mat-cell *matCellDef="let task" class="actions-col">
+          <div class="table-actions">
+            <button
+              mat-icon-button
+              class="action-btn--edit"
+              [routerLink]="['/tasks', task.id, 'edit']"
+              matTooltip="Editar"
+              [attr.aria-label]="'Editar tarefa: ' + task.title">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              class="action-btn--delete"
+              (click)="confirmDelete(task)"
+              matTooltip="Excluir"
+              [attr.aria-label]="'Excluir tarefa: ' + task.title">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+}
+
+<!-- ---- Paginator ---- -->
+@if (!store.loading() && !store.isEmpty()) {
+  <mat-paginator
+    class="paginator"
+    [length]="store.totalElements()"
+    [pageSize]="store.size()"
+    [pageIndex]="store.page()"
+    [pageSizeOptions]="[6, 12, 24, 48]"
+    showFirstLastButtons
+    aria-label="Navegação de páginas"
+    (page)="onPage($event)" />
+}
+</div>

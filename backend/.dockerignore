@@ -1,0 +1,18 @@
+# Maven build output (rebuilt inside Docker)
+target/
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test reports
+surefire-reports/
