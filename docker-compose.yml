@@ -9,11 +9,13 @@ services:
       MYSQL_ROOT_PASSWORD: root
     ports: ["3306:3306"]
     volumes: [mysql_data:/var/lib/mysql]
+    networks: [todo-network]
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 10s
       timeout: 5s
       retries: 10
+
   backend:
     build: ./backend
     container_name: todo-backend
@@ -23,13 +25,35 @@ services:
       DB_USERNAME: todo
       DB_PASSWORD: todo
     ports: ["8080:8080"]
+    networks: [todo-network]
     depends_on:
       mysql:
         condition: service_healthy
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: todo-phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports: ["8181:80"]
+    networks: [todo-network]
+    depends_on:
+      mysql:
+        condition: service_healthy
+
   frontend:
     build: ./frontend
     container_name: todo-frontend
     ports: ["4200:80"]
+    networks: [todo-network]
     depends_on: [backend]
+
+networks:
+  todo-network:
+    driver: bridge
+
 volumes:
   mysql_data:

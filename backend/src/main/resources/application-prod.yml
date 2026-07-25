@@ -4,5 +4,14 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   jpa:
-    hibernate.ddl-auto: validate
+    hibernate:
+      ddl-auto: validate
     open-in-view: false
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+logging:
+  level:
+    com.example.todolist: INFO
+    org.hibernate.SQL: WARN
