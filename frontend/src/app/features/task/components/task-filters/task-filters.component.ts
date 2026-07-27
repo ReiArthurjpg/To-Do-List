@@ -1,13 +1,8 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatButtonModule } from '@angular/material/button';
 import { TASK_STATUS_LABELS, TASK_STATUS_OPTIONS, TaskStatus } from '../../models/task-status.model';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 
@@ -24,100 +19,276 @@ export type ViewMode = 'card' | 'table';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonToggleModule,
     MatIconModule,
     MatTooltipModule,
-    MatButtonModule,
   ],
   template: `
-    <div class="filters-bar" role="search" aria-label="Filtros de tarefas">
-      <!-- Search -->
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-label>Buscar por título</mat-label>
-        <mat-icon matPrefix aria-hidden="true">search</mat-icon>
-        <input
-          matInput
-          [formControl]="titleCtrl"
-          placeholder="Ex: Implementar login..."
-          aria-label="Buscar tarefas por título"
-          autocomplete="off">
-        @if (titleCtrl.value) {
-          <button
-            matSuffix mat-icon-button
-            (click)="clearSearch()"
-            aria-label="Limpar busca">
-            <mat-icon>close</mat-icon>
-          </button>
-        }
-      </mat-form-field>
+    <div class="filters-block" role="search" aria-label="Filtros de tarefas">
 
-      <!-- Status filter -->
-      <mat-form-field appearance="outline" class="status-field">
-        <mat-label>Status</mat-label>
-        <mat-select [formControl]="statusCtrl" aria-label="Filtrar por status">
-          <mat-option value="">Todos os status</mat-option>
-          @for (s of statusOptions; track s) {
-            <mat-option [value]="s">{{ statusLabels[s] }}</mat-option>
+      <!-- Left: Search + Status -->
+      <div class="filters-block__controls">
+
+        <!-- Search -->
+        <div class="search-wrap">
+          <mat-icon class="search-wrap__icon" aria-hidden="true">search</mat-icon>
+          <input
+            class="search-wrap__input"
+            [formControl]="titleCtrl"
+            placeholder="Buscar por título..."
+            aria-label="Buscar tarefas por título"
+            autocomplete="off">
+          @if (titleCtrl.value) {
+            <button
+              class="search-wrap__clear"
+              (click)="clearSearch()"
+              aria-label="Limpar busca"
+              type="button">
+              <mat-icon>close</mat-icon>
+            </button>
           }
-        </mat-select>
-      </mat-form-field>
+        </div>
 
-      <!-- View Toggle -->
-      <mat-button-toggle-group
-        [value]="viewMode"
-        (change)="viewModeChange.emit($event.value)"
-        aria-label="Modo de visualização"
-        class="view-toggle">
-        <mat-button-toggle value="card" matTooltip="Visualizar em cards" aria-label="Cards">
-          <mat-icon>grid_view</mat-icon>
-        </mat-button-toggle>
-        <mat-button-toggle value="table" matTooltip="Visualizar em lista" aria-label="Tabela">
-          <mat-icon>view_list</mat-icon>
-        </mat-button-toggle>
-      </mat-button-toggle-group>
+        <!-- Divider -->
+        <div class="filters-block__divider" aria-hidden="true"></div>
+
+        <!-- Status filter -->
+        <div class="status-wrap">
+          <mat-icon class="status-wrap__icon" aria-hidden="true">filter_list</mat-icon>
+          <select
+            class="status-wrap__select"
+            [formControl]="statusCtrl"
+            aria-label="Filtrar por status">
+            <option value="">Todos os status</option>
+            @for (s of statusOptions; track s) {
+              <option [value]="s">{{ statusLabels[s] }}</option>
+            }
+          </select>
+          <mat-icon class="status-wrap__chevron" aria-hidden="true">expand_more</mat-icon>
+        </div>
+
+      </div>
+
+      <!-- Right: View Toggle -->
+      <div class="filters-block__right">
+
+        <!-- View Toggle -->
+        <div class="view-toggle" role="group" aria-label="Modo de visualização">
+          <button
+            class="view-toggle__btn"
+            [class.view-toggle__btn--active]="viewMode === 'card'"
+            (click)="viewModeChange.emit('card')"
+            matTooltip="Cards"
+            aria-label="Visualizar em cards"
+            type="button">
+            <mat-icon>grid_view</mat-icon>
+          </button>
+          <button
+            class="view-toggle__btn"
+            [class.view-toggle__btn--active]="viewMode === 'table'"
+            (click)="viewModeChange.emit('table')"
+            matTooltip="Tabela"
+            aria-label="Visualizar em tabela"
+            type="button">
+            <mat-icon>view_list</mat-icon>
+          </button>
+        </div>
+
+      </div>
     </div>
   `,
   styles: [`
-    .filters-bar {
+    /* ---- Filters Block ---- */
+    .filters-block {
       display: flex;
       align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+      justify-content: space-between;
       margin-bottom: 20px;
+      background: #ffffff;
+      border: 1px solid rgba(99, 102, 241, 0.12);
+      border-radius: 16px;
+      padding: 10px 16px;
+      box-shadow: 0 2px 12px rgba(99, 102, 241, 0.06);
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
-    .search-field {
+    [data-theme='dark'] .filters-block {
+      background: rgba(30, 41, 59, 0.8);
+      border-color: rgba(99, 102, 241, 0.2);
+      box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ---- Controls (left) ---- */
+    .filters-block__controls {
+      display: flex;
+      align-items: center;
       flex: 1;
-      min-width: 240px;
+      min-width: 0;
     }
 
-    .status-field {
-      width: 200px;
+    /* ---- Right ---- */
+    .filters-block__right {
+      display: flex;
+      align-items: center;
       flex-shrink: 0;
-
-      @media (max-width: 600px) { width: 100%; }
     }
 
+    /* ---- Divider ---- */
+    .filters-block__divider {
+      width: 1px;
+      height: 28px;
+      background: var(--color-border);
+      margin: 0 14px;
+      flex-shrink: 0;
+    }
+
+    /* ---- Search ---- */
+    .search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+      padding: 4px 8px;
+    }
+
+    .search-wrap__icon {
+      color: var(--color-text-tertiary);
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .search-wrap__input {
+      flex: 1;
+      min-width: 0;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: var(--color-text-primary);
+      caret-color: var(--color-primary);
+    }
+
+    .search-wrap__input::placeholder {
+      color: var(--color-text-tertiary);
+    }
+
+    .search-wrap__clear {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px;
+      border-radius: 50%;
+      color: var(--color-text-tertiary);
+      transition: color 150ms ease, background 150ms ease;
+      flex-shrink: 0;
+    }
+
+    .search-wrap__clear:hover {
+      color: var(--color-text-primary);
+      background: var(--color-border);
+    }
+
+    .search-wrap__clear mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+    /* ---- Status Select ---- */
+    .status-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+      padding: 4px 6px;
+    }
+
+    .status-wrap__icon {
+      color: var(--color-text-tertiary);
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .status-wrap__select {
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 0.875rem;
+      font-family: inherit;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      padding-right: 20px;
+    }
+
+    .status-wrap__chevron {
+      color: var(--color-text-tertiary);
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      pointer-events: none;
+      margin-left: -20px;
+    }
+
+    /* ---- View Toggle ---- */
     .view-toggle {
-      flex-shrink: 0;
-      border-radius: 8px !important;
-      overflow: hidden;
-      border: 1px solid var(--color-border) !important;
-
-      ::ng-deep {
-        .mat-button-toggle { border: none !important; }
-        .mat-button-toggle-button { height: 48px !important; }
-        .mat-button-toggle-checked { background: var(--color-primary-light) !important; color: var(--color-primary) !important; }
-      }
+      display: flex;
+      align-items: center;
+      gap: 2px;
     }
 
-    @media (max-width: 600px) {
-      .filters-bar { flex-direction: column; align-items: stretch; }
-      .search-field { min-width: 0; }
-      .view-toggle { align-self: flex-end; }
+    .view-toggle__btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--color-text-tertiary);
+      cursor: pointer;
+      transition: background 150ms ease, color 150ms ease;
+    }
+
+    .view-toggle__btn mat-icon { font-size: 20px; width: 20px; height: 20px; }
+
+    .view-toggle__btn:hover {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+    }
+
+    .view-toggle__btn--active {
+      background: var(--color-primary-light) !important;
+      color: var(--color-primary) !important;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 768px) {
+      .filters-block {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px;
+      }
+
+      .filters-block__controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+
+      .filters-block__divider { display: none; }
+
+      .filters-block__right {
+        justify-content: flex-end;
+      }
     }
   `],
 })
