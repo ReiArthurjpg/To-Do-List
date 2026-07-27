@@ -3,8 +3,11 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { LoadingService } from '../../core/services/loading.service';
 import { animate, style, transition, trigger } from '@angular/animations';
+import { TaskFormDialogComponent } from '../../features/task/components/task-form-dialog/task-form-dialog.component';
+import { TaskStoreService } from '../../features/task/store/task-store.service';
 
 @Component({
   selector: 'app-main-layout',
@@ -15,6 +18,7 @@ import { animate, style, transition, trigger } from '@angular/animations';
     RouterLink,
     MatButtonModule,
     MatIconModule,
+    MatDialogModule,
   ],
   animations: [
     trigger('pageAnim', [
@@ -46,14 +50,14 @@ import { animate, style, transition, trigger } from '@angular/animations';
 
         <!-- Actions -->
         <div class="app-header__actions">
-          <a
+          <button
             mat-flat-button
-            routerLink="/tasks/new"
+            (click)="openFormDialog()"
             class="btn-new-task"
             aria-label="Criar nova tarefa">
             <mat-icon>add</mat-icon>
             <span class="btn-new-task__label">Nova tarefa</span>
-          </a>
+          </button>
         </div>
 
       </div>
@@ -198,4 +202,21 @@ import { animate, style, transition, trigger } from '@angular/animations';
 })
 export class MainLayoutComponent {
   readonly loading = inject(LoadingService);
+  private readonly dialog = inject(MatDialog);
+  private readonly store = inject(TaskStoreService);
+
+  openFormDialog(): void {
+    const ref = this.dialog.open(TaskFormDialogComponent, {
+      maxWidth: '600px',
+      width: '100%',
+      panelClass: 'task-form-panel',
+    });
+
+    ref.afterClosed().subscribe(result => {
+      if (result) {
+        this.store.loadPage();
+        this.store.loadStats();
+      }
+    });
+  }
 }

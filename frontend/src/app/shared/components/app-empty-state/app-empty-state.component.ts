@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -24,15 +24,26 @@ import { animate, style, transition, trigger } from '@angular/animations';
       </div>
       <h3 class="empty-state__title">{{ title }}</h3>
       <p class="empty-state__message">{{ message }}</p>
-      @if (ctaLabel && ctaRoute) {
-        <a
-          mat-flat-button
-          class="empty-state__cta"
-          [routerLink]="ctaRoute"
-          [attr.aria-label]="ctaLabel">
-          <mat-icon>add</mat-icon>
-          {{ ctaLabel }}
-        </a>
+      @if (ctaLabel) {
+        @if (ctaRoute) {
+          <a
+            mat-flat-button
+            class="empty-state__cta"
+            [routerLink]="ctaRoute"
+            [attr.aria-label]="ctaLabel">
+            <mat-icon>add</mat-icon>
+            {{ ctaLabel }}
+          </a>
+        } @else {
+          <button
+            mat-flat-button
+            class="empty-state__cta"
+            (click)="ctaClick.emit()"
+            [attr.aria-label]="ctaLabel">
+            <mat-icon>add</mat-icon>
+            {{ ctaLabel }}
+          </button>
+        }
       }
     </div>
   `,
@@ -88,4 +99,5 @@ export class AppEmptyStateComponent {
   @Input() message: string = 'Nenhum item encontrado.';
   @Input() ctaLabel?: string;
   @Input() ctaRoute?: string;
+  @Output() ctaClick = new EventEmitter<void>();
 }
