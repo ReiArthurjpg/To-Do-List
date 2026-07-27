@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChange
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TASK_STATUS_LABELS, TASK_STATUS_OPTIONS, TaskStatus } from '../../models/task-status.model';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
@@ -20,6 +21,7 @@ export type ViewMode = 'card' | 'table';
     CommonModule,
     ReactiveFormsModule,
     MatIconModule,
+    MatSelectModule,
     MatTooltipModule,
   ],
   template: `
@@ -54,16 +56,19 @@ export type ViewMode = 'card' | 'table';
         <!-- Status filter -->
         <div class="status-wrap">
           <mat-icon class="status-wrap__icon" aria-hidden="true">filter_list</mat-icon>
-          <select
+          <mat-select
             class="status-wrap__select"
             [formControl]="statusCtrl"
-            aria-label="Filtrar por status">
-            <option value="">Todos os status</option>
+            aria-label="Filtrar por status"
+            panelClass="custom-status-panel">
+            <mat-select-trigger>
+              {{ statusCtrl.value === '' ? 'Todos os status' : statusLabels[statusCtrl.value] }}
+            </mat-select-trigger>
+            <mat-option value="">Todos os status</mat-option>
             @for (s of statusOptions; track s) {
-              <option [value]="s">{{ statusLabels[s] }}</option>
+              <mat-option [value]="s">{{ statusLabels[s] }}</mat-option>
             }
-          </select>
-          <mat-icon class="status-wrap__chevron" aria-hidden="true">expand_more</mat-icon>
+          </mat-select>
         </div>
 
       </div>
@@ -215,26 +220,18 @@ export type ViewMode = 'card' | 'table';
     }
 
     .status-wrap__select {
-      border: none;
-      outline: none;
-      background: transparent;
       font-size: 0.875rem;
-      font-family: inherit;
       font-weight: 500;
       color: var(--color-text-primary);
-      cursor: pointer;
-      appearance: none;
-      -webkit-appearance: none;
-      padding-right: 20px;
+      width: 140px;
     }
 
-    .status-wrap__chevron {
+    ::ng-deep .status-wrap__select .mat-mdc-select-value {
+      color: var(--color-text-primary);
+    }
+    
+    ::ng-deep .status-wrap__select .mat-mdc-select-arrow {
       color: var(--color-text-tertiary);
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-      pointer-events: none;
-      margin-left: -20px;
     }
 
     /* ---- View Toggle ---- */

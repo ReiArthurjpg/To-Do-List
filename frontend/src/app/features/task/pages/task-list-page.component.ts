@@ -23,6 +23,7 @@ import { AppConfirmDialogComponent } from '../../../shared/components/app-confir
 import { RelativeDatePipe } from '../../../shared/pipes/relative-date.pipe';
 import { TaskDetailDialogComponent } from '../components/task-detail-dialog/task-detail-dialog.component';
 import { animate, query, stagger, style, transition, trigger } from '@angular/animations';
+import { TaskFormDialogComponent } from '../components/task-form-dialog/task-form-dialog.component';
 
 @Component({
   selector: 'app-task-list-page',
@@ -43,6 +44,7 @@ import { animate, query, stagger, style, transition, trigger } from '@angular/an
     TaskStatsComponent,
     TaskFiltersComponent,
     TaskDetailDialogComponent,
+    TaskFormDialogComponent,
     AppSkeletonComponent,
     AppEmptyStateComponent,
     AppChipComponent,
@@ -116,6 +118,22 @@ export class TaskListPageComponent implements OnInit {
     });
   }
 
+  openFormDialog(task?: Task): void {
+    const ref = this.dialog.open(TaskFormDialogComponent, {
+      data: { task },
+      maxWidth: '600px',
+      width: '100%',
+      panelClass: 'task-form-panel',
+    });
+
+    ref.afterClosed().subscribe(result => {
+      if (result) {
+        this.store.loadPage();
+        this.store.loadStats();
+      }
+    });
+  }
+
   openDetail(task: Task): void {
     const ref = this.dialog.open(TaskDetailDialogComponent, {
       data: { task },
@@ -127,6 +145,8 @@ export class TaskListPageComponent implements OnInit {
     ref.afterClosed().subscribe((result) => {
       if (result === 'delete') {
         this.confirmDelete(task);
+      } else if (result === 'edit') {
+        this.openFormDialog(task);
       }
     });
   }

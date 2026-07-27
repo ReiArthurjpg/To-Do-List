@@ -91,9 +91,9 @@ export type TaskDetailDialogResult = 'edit' | 'delete' | undefined;
           Excluir
         </button>
 
-        <a mat-stroked-button class="edit-btn" [routerLink]="['/tasks', task.id, 'edit']" (click)="close()">
+        <button mat-stroked-button class="edit-btn" (click)="onEdit()">
           Editar
-        </a>
+        </button>
       </mat-dialog-actions>
     </div>
   `,
@@ -346,5 +346,9 @@ export class TaskDetailDialogComponent {
 
   onDelete(): void {
     this.dialogRef.close('delete');
+  }
+
+  onEdit(): void {
+    this.dialogRef.close('edit');
   }
 }

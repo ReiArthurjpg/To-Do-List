@@ -38,7 +38,7 @@
       ? 'Tente ajustar os filtros ou limpar a busca.'
       : 'Comece criando sua primeira tarefa clicando no botão acima.'"
     ctaLabel="Criar primeira tarefa"
-    ctaRoute="/tasks/new" />
+    (ctaClick)="openFormDialog()" />
 }
 
 <!-- ---- CARD VIEW ---- -->
@@ -130,7 +130,7 @@
             <button
               mat-icon-button
               class="action-btn--edit"
-              [routerLink]="['/tasks', task.id, 'edit']"
+              (click)="openFormDialog(task)"
               matTooltip="Editar"
               [attr.aria-label]="'Editar tarefa: ' + task.title">
               <mat-icon>edit</mat-icon>

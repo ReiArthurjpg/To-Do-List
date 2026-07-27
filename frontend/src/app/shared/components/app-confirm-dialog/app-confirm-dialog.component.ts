@@ -29,91 +29,112 @@ export interface ConfirmDialogData {
     ]),
   ],
   template: `
-    <div class="dialog-wrapper" @dialogAnim>
-      <div class="dialog-icon" [class.dialog-icon--danger]="data.danger">
-        <mat-icon>{{ data.danger ? 'delete_forever' : 'help_outline' }}</mat-icon>
+    <div class="dialog-container" @dialogAnim>
+      <div class="dialog-header">
+        <h2 mat-dialog-title class="task-title">{{ data.title }}</h2>
+        <button mat-icon-button class="dialog-close" [mat-dialog-close]="false">
+          <mat-icon>close</mat-icon>
+        </button>
       </div>
 
-      <h2 mat-dialog-title class="dialog-title">{{ data.title }}</h2>
-
       <mat-dialog-content class="dialog-content">
-        <p>{{ data.message }}</p>
+        <p class="message">{{ data.message }}</p>
       </mat-dialog-content>
 
-      <mat-dialog-actions class="dialog-actions" align="end">
-        <button
-          mat-button
-          class="btn-cancel"
-          [mat-dialog-close]="false"
-          aria-label="Cancelar ação">
+      <mat-dialog-actions class="dialog-actions">
+        <div class="spacer"></div>
+        <button mat-button class="cancel-btn" [mat-dialog-close]="false">
           {{ data.cancelLabel ?? 'Cancelar' }}
         </button>
-        <button
-          mat-flat-button
-          [class]="data.danger ? 'btn-danger' : 'btn-confirm'"
-          [mat-dialog-close]="true"
-          [attr.aria-label]="data.confirmLabel ?? 'Confirmar'">
+        <button mat-stroked-button [class]="data.danger ? 'delete-btn' : 'confirm-btn'" [mat-dialog-close]="true">
           {{ data.confirmLabel ?? 'Confirmar' }}
         </button>
       </mat-dialog-actions>
     </div>
   `,
   styles: [`
-    .dialog-wrapper {
-      padding: 8px 8px 0;
-      min-width: 360px;
+    .dialog-container {
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
+      background: var(--color-surface, #ffffff);
     }
 
-    .dialog-icon {
-      width: 52px; height: 52px;
-      border-radius: 50%;
-      background: #eff6ff;
-      color: #3b82f6;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 16px;
-      mat-icon { font-size: 24px; width: 24px; height: 24px; }
+    [data-theme='dark'] .dialog-container {
+      background: #1e293b;
     }
 
-    .dialog-icon--danger {
-      background: #fef2f2;
-      color: #ef4444;
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--color-border, #e2e8f0);
     }
 
-    .dialog-title {
-      text-align: center;
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin: 0 0 4px !important;
+    .dialog-close {
+      color: var(--color-text-tertiary, #94a3b8);
+    }
+
+    .task-title {
+      font-size: 1.375rem;
+      font-weight: 700;
+      color: var(--color-text-primary, #0f172a);
+      margin: 0;
+      line-height: 1.3;
     }
 
     .dialog-content {
-      text-align: center;
-      color: var(--color-text-secondary);
-      font-size: 0.9rem;
+      padding: 24px !important;
+      margin: 0 !important;
+    }
+
+    .message {
+      font-size: 1rem;
+      color: var(--color-text-secondary, #475569);
+      line-height: 1.5;
+      margin: 0;
     }
 
     .dialog-actions {
-      padding: 16px 0 8px !important;
-      gap: 8px;
+      padding: 16px 24px !important;
+      border-top: 1px solid var(--color-border, #e2e8f0);
+      margin: 0 !important;
+      background: var(--color-surface, #ffffff);
     }
 
-    .btn-cancel {
-      color: var(--color-text-secondary);
+    [data-theme='dark'] .dialog-actions {
+      background: #1e293b;
     }
 
-    .btn-danger {
-      background: #ef4444 !important;
-      color: #fff !important;
-      &:hover { background: #dc2626 !important; }
+    .spacer {
+      flex: 1;
     }
 
-    .btn-confirm {
-      background: var(--color-primary) !important;
-      color: #fff !important;
+    .cancel-btn {
+      color: var(--color-text-secondary, #475569);
     }
 
-    @media (max-width: 480px) {
-      .dialog-wrapper { min-width: 280px; }
+    .delete-btn {
+      border-color: #ef4444 !important;
+      color: #ef4444 !important;
+      transition: all 0.2s ease;
+    }
+
+    .delete-btn:hover {
+      background-color: #ef4444 !important;
+      color: #ffffff !important;
+    }
+
+    .confirm-btn {
+      border-color: var(--color-primary, #3b82f6) !important;
+      color: var(--color-primary, #3b82f6) !important;
+      transition: all 0.2s ease;
+    }
+
+    .confirm-btn:hover {
+      background-color: var(--color-primary, #3b82f6) !important;
+      color: #ffffff !important;
     }
   `],
 })
