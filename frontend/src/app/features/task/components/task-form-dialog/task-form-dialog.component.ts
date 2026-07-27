@@ -36,17 +36,7 @@ export interface TaskFormDialogData {
     <div class="dialog-container">
       <!-- Header -->
       <div class="dialog-header">
-        <div class="header-title-container">
-          <div class="header-icon">
-            <mat-icon>{{ isEdit ? 'edit_note' : 'add_task' }}</mat-icon>
-          </div>
-          <div>
-            <h2 mat-dialog-title class="dialog-title">{{ isEdit ? 'Editar tarefa' : 'Nova tarefa' }}</h2>
-            <p class="dialog-subtitle">
-              {{ isEdit ? 'Atualize as informações da tarefa.' : 'Preencha os campos para criar a tarefa.' }}
-            </p>
-          </div>
-        </div>
+        <h2 mat-dialog-title class="dialog-title">{{ isEdit ? 'Editar tarefa' : 'Nova tarefa' }}</h2>
         <button mat-icon-button class="dialog-close" (click)="close()">
           <mat-icon>close</mat-icon>
         </button>
@@ -120,7 +110,7 @@ export interface TaskFormDialogData {
         <button mat-button class="btn-cancel" (click)="close()" [disabled]="saving()">
           Cancelar
         </button>
-        <button mat-flat-button class="btn-save" (click)="submit()" [disabled]="saving()">
+        <button mat-stroked-button class="btn-save" (click)="submit()" [disabled]="saving()">
           @if (saving()) {
             <mat-spinner diameter="18" class="spinner-mr" />
             <span>Salvando...</span>
@@ -146,48 +136,22 @@ export interface TaskFormDialogData {
 
     .dialog-header {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       padding: 16px 24px;
       border-bottom: 1px solid var(--color-border, #e2e8f0);
     }
 
-    .header-title-container {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .header-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      background: rgba(99, 102, 241, 0.1);
-      color: #6366f1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
     .dialog-title {
-      font-size: 1.25rem;
+      font-size: 1.375rem;
       font-weight: 700;
       color: var(--color-text-primary, #0f172a);
-      margin: 0 0 2px 0 !important;
-      line-height: 1.2;
-    }
-
-    .dialog-subtitle {
-      font-size: 0.875rem;
-      color: var(--color-text-tertiary, #64748b);
       margin: 0;
+      line-height: 1.3;
     }
 
     .dialog-close {
       color: var(--color-text-tertiary, #94a3b8);
-      margin-top: -4px;
-      margin-right: -8px;
     }
 
     .dialog-content {
@@ -261,11 +225,17 @@ export interface TaskFormDialogData {
     }
 
     .btn-save {
-      background: var(--color-primary, #6366f1) !important;
-      color: #fff !important;
+      border-color: var(--color-primary, #6366f1) !important;
+      color: var(--color-primary, #6366f1) !important;
       display: flex;
       align-items: center;
       gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-save:hover {
+      background-color: var(--color-primary, #6366f1) !important;
+      color: #ffffff !important;
     }
 
     .spinner-mr {
