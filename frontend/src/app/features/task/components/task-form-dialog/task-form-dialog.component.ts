@@ -115,7 +115,6 @@ export interface TaskFormDialogData {
             <mat-spinner diameter="18" class="spinner-mr" />
             <span>Salvando...</span>
           } @else {
-            <mat-icon>{{ isEdit ? 'save' : 'add_task' }}</mat-icon>
             <span>{{ isEdit ? 'Salvar' : 'Criar' }}</span>
           }
         </button>
@@ -225,8 +224,8 @@ export interface TaskFormDialogData {
     }
 
     .btn-save {
-      border-color: var(--color-primary, #6366f1) !important;
-      color: var(--color-primary, #6366f1) !important;
+      border-color: #22c55e !important;
+      color: #22c55e !important;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -234,7 +233,7 @@ export interface TaskFormDialogData {
     }
 
     .btn-save:hover {
-      background-color: var(--color-primary, #6366f1) !important;
+      background-color: #22c55e !important;
       color: #ffffff !important;
     }
 
