@@ -1,0 +1,205 @@
+@use '../../../../../styles/tokens' as *;
+
+:host {
+  display: block;
+}
+
+// ---- Page Header ----
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+
+  &__title {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  &__subtitle {
+    margin-top: 4px;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+}
+
+// ---- Task Grid (Card View) ----
+.task-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.task-card-wrapper {
+  display: contents;
+}
+
+// ---- Table View ----
+.table-container {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.task-table {
+  width: 100%;
+  background: transparent !important;
+
+  th.mat-mdc-header-cell {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-secondary) !important;
+    background: var(--color-background) !important;
+    border-bottom: 1px solid var(--color-border) !important;
+    padding: 12px 16px !important;
+  }
+
+  td.mat-mdc-cell {
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+    border-bottom: 1px solid var(--color-border) !important;
+    padding: 14px 16px !important;
+    vertical-align: middle;
+  }
+
+  tr.mat-mdc-row {
+    transition: background 150ms ease;
+    &:hover td { background: var(--color-background) !important; }
+    &:last-child td { border-bottom: none !important; }
+  }
+}
+
+// Sort button
+.sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  padding: 0;
+
+  .sort-icon {
+    font-size: 14px !important;
+    width: 14px !important;
+    height: 14px !important;
+  }
+}
+
+// Table title cell
+.table-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 320px;
+
+  &__text {
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__desc {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// Table actions
+.actions-col { width: 100px; }
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+tr.mat-mdc-row:hover .table-actions { opacity: 1; }
+
+.action-btn--edit {
+  color: var(--color-info) !important;
+  width: 32px !important; height: 32px !important;
+}
+
+.action-btn--delete {
+  color: var(--color-error) !important;
+  width: 32px !important; height: 32px !important;
+  &:hover { background: var(--color-error-bg) !important; }
+}
+
+// ---- Paginator ----
+.paginator {
+  background: #ffffff !important;
+  border: 1px solid rgba(99, 102, 241, 0.12) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.06) !important;
+  margin-top: 16px;
+  padding: 4px 8px;
+  transition: all 200ms ease;
+
+  ::ng-deep {
+    .mat-mdc-paginator-container {
+      min-height: 52px;
+      padding: 0 8px;
+    }
+
+    .mat-mdc-paginator-page-size-label,
+    .mat-mdc-paginator-range-label {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+    }
+
+    .mat-mdc-select-trigger {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .mat-mdc-paginator-navigation-button {
+      color: var(--color-text-secondary);
+      border-radius: 10px;
+      transition: background 150ms ease, color 150ms ease;
+
+      &:hover:not([disabled]) {
+        background: var(--color-primary-light);
+        color: var(--color-primary);
+      }
+
+      &[disabled] {
+        opacity: 0.35;
+      }
+    }
+  }
+}
+
+[data-theme='dark'] .paginator {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(99, 102, 241, 0.2) !important;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
