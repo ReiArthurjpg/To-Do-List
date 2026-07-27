@@ -21,9 +21,11 @@ public record TaskResponse(
         TaskStatus status,
 
         @Schema(description = "Creation timestamp")
+        @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         LocalDateTime createdAt,
 
         @Schema(description = "Last update timestamp")
+        @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         LocalDateTime updatedAt
 
 ) {}

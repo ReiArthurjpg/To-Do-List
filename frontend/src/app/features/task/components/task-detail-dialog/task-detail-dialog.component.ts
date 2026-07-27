@@ -66,20 +66,26 @@ export type TaskDetailDialogResult = 'edit' | 'delete' | undefined;
             </div>
             <div class="date-info">
               <span class="date-label">Criado em</span>
-              <span class="date-value">{{ task.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
-              <span class="date-relative">{{ task.createdAt | relativeDate }}</span>
+              <span class="date-value">
+                @if (createdAtSafe) {
+                  {{ createdAtSafe | date:'dd/MM/yyyy HH:mm' }}
+                } @else {
+                  —
+                }
+              </span>
+              <span class="date-relative">{{ createdAtSafe | relativeDate }}</span>
             </div>
           </div>
 
-          @if (task.updatedAt && task.updatedAt !== task.createdAt) {
+          @if (updatedAtSafe && updatedAtSafe !== createdAtSafe) {
             <div class="date-card">
               <div class="date-icon-wrapper">
                 <mat-icon>update</mat-icon>
               </div>
               <div class="date-info">
                 <span class="date-label">Atualizado</span>
-                <span class="date-value">{{ task.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
-                <span class="date-relative">{{ task.updatedAt | relativeDate }}</span>
+                <span class="date-value">{{ updatedAtSafe | date:'dd/MM/yyyy HH:mm' }}</span>
+                <span class="date-relative">{{ updatedAtSafe | relativeDate }}</span>
               </div>
             </div>
           }
@@ -301,6 +307,16 @@ export class TaskDetailDialogComponent {
     private dialogRef: MatDialogRef<TaskDetailDialogComponent, TaskDetailDialogResult>,
   ) {
     this.task = data.task;
+  }
+
+  get createdAtSafe(): string | null {
+    if (!this.task?.createdAt) return null;
+    return this.task.createdAt.split('.')[0];
+  }
+
+  get updatedAtSafe(): string | null {
+    if (!this.task?.updatedAt) return null;
+    return this.task.updatedAt.split('.')[0];
   }
 
   close(): void {
