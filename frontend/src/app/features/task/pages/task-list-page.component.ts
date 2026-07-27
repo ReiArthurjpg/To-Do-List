@@ -21,6 +21,7 @@ import { AppEmptyStateComponent } from '../../../shared/components/app-empty-sta
 import { AppChipComponent } from '../../../shared/components/app-chip/app-chip.component';
 import { AppConfirmDialogComponent } from '../../../shared/components/app-confirm-dialog/app-confirm-dialog.component';
 import { RelativeDatePipe } from '../../../shared/pipes/relative-date.pipe';
+import { TaskDetailDialogComponent } from '../components/task-detail-dialog/task-detail-dialog.component';
 import { animate, query, stagger, style, transition, trigger } from '@angular/animations';
 
 @Component({
@@ -41,6 +42,7 @@ import { animate, query, stagger, style, transition, trigger } from '@angular/an
     TaskCardComponent,
     TaskStatsComponent,
     TaskFiltersComponent,
+    TaskDetailDialogComponent,
     AppSkeletonComponent,
     AppEmptyStateComponent,
     AppChipComponent,
@@ -111,6 +113,15 @@ export class TaskListPageComponent implements OnInit {
         duration: 4000,
         panelClass: ['snack-success'],
       });
+    });
+  }
+
+  openDetail(task: Task): void {
+    this.dialog.open(TaskDetailDialogComponent, {
+      data: { task },
+      maxWidth: '520px',
+      width: '100%',
+      panelClass: 'task-detail-panel',
     });
   }
 

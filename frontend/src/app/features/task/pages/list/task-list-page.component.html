@@ -52,7 +52,7 @@
       <div class="task-card-wrapper" role="listitem">
         <app-task-card
           [task]="task"
-          (delete)="confirmDelete($event)" />
+          (viewDetail)="openDetail($event)" />
       </div>
     }
   </div>
