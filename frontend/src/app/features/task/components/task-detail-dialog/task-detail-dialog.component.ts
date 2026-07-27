@@ -1,13 +1,13 @@
 import { Component, Inject } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Task } from '../../interfaces/task.interface';
 import { AppChipComponent } from '../../../../shared/components/app-chip/app-chip.component';
-import { RelativeDatePipe } from '../../../../shared/pipes/relative-date.pipe';
-import { te } from 'date-fns/locale';
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 export interface TaskDetailDialogData {
   task: Task;
@@ -20,13 +20,11 @@ export type TaskDetailDialogResult = 'edit' | 'delete' | undefined;
   standalone: true,
   imports: [
     CommonModule,
-    DatePipe,
     RouterLink,
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
     AppChipComponent,
-    RelativeDatePipe,
   ],
   template: `
     <div class="dialog-container">
@@ -66,26 +64,20 @@ export type TaskDetailDialogResult = 'edit' | 'delete' | undefined;
             </div>
             <div class="date-info">
               <span class="date-label">Criado em</span>
-              <span class="date-value">
-                @if (createdAtSafe) {
-                  {{ createdAtSafe | date:'dd/MM/yyyy HH:mm' }}
-                } @else {
-                  —
-                }
-              </span>
-              <span class="date-relative">{{ createdAtSafe | relativeDate }}</span>
+              <span class="date-value">{{ formatExactDate(task.createdAt) }}</span>
+              <span class="date-relative">{{ formatRelativeDate(task.createdAt) }}</span>
             </div>
           </div>
 
-          @if (updatedAtSafe && updatedAtSafe !== createdAtSafe) {
+          @if (hasBeenUpdated) {
             <div class="date-card">
               <div class="date-icon-wrapper">
                 <mat-icon>update</mat-icon>
               </div>
               <div class="date-info">
                 <span class="date-label">Atualizado</span>
-                <span class="date-value">{{ updatedAtSafe | date:'dd/MM/yyyy HH:mm' }}</span>
-                <span class="date-relative">{{ updatedAtSafe | relativeDate }}</span>
+                <span class="date-value">{{ formatExactDate(task.updatedAt) }}</span>
+                <span class="date-relative">{{ formatRelativeDate(task.updatedAt) }}</span>
               </div>
             </div>
           }
@@ -309,14 +301,43 @@ export class TaskDetailDialogComponent {
     this.task = data.task;
   }
 
-  get createdAtSafe(): string | null {
-    if (!this.task?.createdAt) return null;
-    return this.task.createdAt.split('.')[0];
+  get hasBeenUpdated(): boolean {
+    if (!this.task?.createdAt || !this.task?.updatedAt) return false;
+    // Remove microseconds and milliseconds for comparison
+    const created = this.task.createdAt.split('.')[0];
+    const updated = this.task.updatedAt.split('.')[0];
+    return created !== updated;
   }
 
-  get updatedAtSafe(): string | null {
-    if (!this.task?.updatedAt) return null;
-    return this.task.updatedAt.split('.')[0];
+  formatExactDate(dateStr: string | null | undefined): string {
+    if (!dateStr) return '—';
+    try {
+      const cleanStr = dateStr.split('.')[0];
+      const date = new Date(cleanStr);
+      if (isNaN(date.getTime())) return '—';
+
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+
+      return `${day}/${month}/${year} ${hours}:${minutes}`;
+    } catch {
+      return '—';
+    }
+  }
+
+  formatRelativeDate(dateStr: string | null | undefined): string {
+    if (!dateStr) return '—';
+    try {
+      const cleanStr = dateStr.split('.')[0];
+      const date = new Date(cleanStr);
+      if (isNaN(date.getTime())) return '—';
+      return formatDistanceToNow(date, { addSuffix: true, locale: ptBR });
+    } catch {
+      return '—';
+    }
   }
 
   close(): void {
