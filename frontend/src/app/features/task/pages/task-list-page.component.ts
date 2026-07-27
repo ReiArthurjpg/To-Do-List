@@ -117,11 +117,17 @@ export class TaskListPageComponent implements OnInit {
   }
 
   openDetail(task: Task): void {
-    this.dialog.open(TaskDetailDialogComponent, {
+    const ref = this.dialog.open(TaskDetailDialogComponent, {
       data: { task },
       maxWidth: '520px',
       width: '100%',
       panelClass: 'task-detail-panel',
+    });
+
+    ref.afterClosed().subscribe((result) => {
+      if (result === 'delete') {
+        this.confirmDelete(task);
+      }
     });
   }
 

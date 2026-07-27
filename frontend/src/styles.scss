@@ -61,3 +61,13 @@ $dark-theme: mat.m2-define-dark-theme((
   --color-info-bg:           #{$info-bg};
   --color-info-text:         #{$info-text};
 }
+
+// Override Angular Material Dialog padding for task-detail-panel
+.task-detail-panel {
+  .mat-mdc-dialog-container .mdc-dialog__surface {
+    padding: 0 !important;
+    border-radius: 20px !important;
+    overflow: hidden !important;
+  }
+}
+

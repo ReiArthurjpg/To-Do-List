@@ -7,11 +7,13 @@ import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/materia
 import { Task } from '../../interfaces/task.interface';
 import { AppChipComponent } from '../../../../shared/components/app-chip/app-chip.component';
 import { RelativeDatePipe } from '../../../../shared/pipes/relative-date.pipe';
-import { animate, style, transition, trigger } from '@angular/animations';
+import { te } from 'date-fns/locale';
 
 export interface TaskDetailDialogData {
   task: Task;
 }
+
+export type TaskDetailDialogResult = 'edit' | 'delete' | undefined;
 
 @Component({
   selector: 'app-task-detail-dialog',
@@ -26,260 +28,286 @@ export interface TaskDetailDialogData {
     AppChipComponent,
     RelativeDatePipe,
   ],
-  animations: [
-    trigger('modalAnim', [
-      transition(':enter', [
-        style({ opacity: 0, transform: 'scale(0.96) translateY(8px)' }),
-        animate('280ms cubic-bezier(0.34,1.56,0.64,1)',
-          style({ opacity: 1, transform: 'scale(1) translateY(0)' })),
-      ]),
-      transition(':leave', [
-        animate('180ms ease', style({ opacity: 0, transform: 'scale(0.97)' })),
-      ]),
-    ]),
-  ],
   template: `
-    <div class="detail-dialog" @modalAnim>
-
+    <div class="dialog-container">
+      
       <!-- Header -->
-      <div class="detail-dialog__header">
+      <div class="dialog-header">
         <app-chip [status]="task.status" />
-        <button
-          mat-icon-button
-          class="detail-dialog__close"
-          (click)="close()"
-          aria-label="Fechar detalhes da tarefa">
+        <button mat-icon-button class="dialog-close" (click)="close()" aria-label="Fechar">
           <mat-icon>close</mat-icon>
         </button>
       </div>
 
-      <!-- Title -->
-      <h2 class="detail-dialog__title">{{ task.title }}</h2>
+      <mat-dialog-content class="dialog-content">
+        <!-- Title -->
+        <h2 class="task-title">{{ task.title }}</h2>
 
-      <!-- Description -->
-      <div class="detail-dialog__section">
-        <div class="detail-dialog__section-label">
-          <mat-icon>notes</mat-icon>
-          Descrição
-        </div>
-        @if (task.description) {
-          <p class="detail-dialog__description">{{ task.description }}</p>
-        } @else {
-          <p class="detail-dialog__description detail-dialog__description--empty">
-            Sem descrição cadastrada
-          </p>
-        }
-      </div>
-
-      <!-- Dates -->
-      <div class="detail-dialog__dates">
-        <div class="detail-dialog__date-item">
-          <mat-icon aria-hidden="true">schedule</mat-icon>
-          <div class="detail-dialog__date-body">
-            <span class="detail-dialog__date-label">Criado em</span>
-            <span class="detail-dialog__date-value"
-              [title]="task.createdAt | date:'dd/MM/yyyy HH:mm'">
-              {{ task.createdAt | relativeDate }}
-            </span>
+        <!-- Description -->
+        <div class="section-container">
+          <div class="section-label">
+            <mat-icon class="section-icon">notes</mat-icon>
+            <span>Descrição</span>
+          </div>
+          <div class="section-card">
+            @if (task.description) {
+              <p class="task-desc">{{ task.description }}</p>
+            } @else {
+              <p class="task-desc task-desc--empty">Nenhuma descrição fornecida.</p>
+            }
           </div>
         </div>
 
-        @if (task.updatedAt !== task.createdAt) {
-          <div class="detail-dialog__date-item">
-            <mat-icon aria-hidden="true">update</mat-icon>
-            <div class="detail-dialog__date-body">
-              <span class="detail-dialog__date-label">Atualizado em</span>
-              <span class="detail-dialog__date-value"
-                [title]="task.updatedAt | date:'dd/MM/yyyy HH:mm'">
-                {{ task.updatedAt | relativeDate }}
-              </span>
+        <!-- Dates -->
+        <div class="dates-grid">
+          <div class="date-card">
+            <div class="date-icon-wrapper">
+              <mat-icon>calendar_today</mat-icon>
+            </div>
+            <div class="date-info">
+              <span class="date-label">Criado em</span>
+              <span class="date-value">{{ task.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+              <span class="date-relative">{{ task.createdAt | relativeDate }}</span>
             </div>
           </div>
-        }
-      </div>
 
-      <!-- Actions -->
-      <div class="detail-dialog__actions">
-        <button mat-stroked-button class="btn-cancel" (click)="close()">
-          Fechar
+          @if (task.updatedAt && task.updatedAt !== task.createdAt) {
+            <div class="date-card">
+              <div class="date-icon-wrapper">
+                <mat-icon>update</mat-icon>
+              </div>
+              <div class="date-info">
+                <span class="date-label">Atualizado</span>
+                <span class="date-value">{{ task.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                <span class="date-relative">{{ task.updatedAt | relativeDate }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </mat-dialog-content>
+
+      <mat-dialog-actions class="dialog-actions">
+        <div class="spacer"></div>
+
+        <button mat-stroked-button color="warn" class="delete-btn" (click)="onDelete()">
+          Excluir
         </button>
-        <a mat-flat-button class="btn-edit"
-          [routerLink]="['/tasks', task.id, 'edit']"
-          (click)="close()">
-          <mat-icon>edit</mat-icon>
-          Editar tarefa
-        </a>
-      </div>
 
+        <a mat-stroked-button class="edit-btn" [routerLink]="['/tasks', task.id, 'edit']" (click)="close()">
+          Editar
+        </a>
+      </mat-dialog-actions>
     </div>
   `,
   styles: [`
-    .detail-dialog {
-      padding: 28px;
+    .dialog-container {
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      max-width: 480px;
       width: 100%;
+      background: var(--color-surface, #ffffff);
     }
 
-    /* ---- Header ---- */
-    .detail-dialog__header {
+    [data-theme='dark'] .dialog-container {
+      background: #1e293b;
+    }
+
+    .dialog-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--color-border, #e2e8f0);
     }
 
-    .detail-dialog__close {
-      color: var(--color-text-tertiary) !important;
-      width: 32px !important;
-      height: 32px !important;
+    .dialog-close {
+      color: var(--color-text-tertiary, #94a3b8);
     }
 
-    .detail-dialog__close mat-icon {
-      font-size: 18px !important;
-      width: 18px !important;
-      height: 18px !important;
+    .dialog-content {
+      padding: 24px !important;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin: 0 !important;
     }
 
-    /* ---- Title ---- */
-    .detail-dialog__title {
+    .task-title {
       font-size: 1.375rem;
       font-weight: 700;
-      letter-spacing: -0.03em;
-      color: var(--color-text-primary);
-      line-height: 1.3;
+      color: var(--color-text-primary, #0f172a);
       margin: 0;
+      line-height: 1.3;
+      word-break: break-word;
     }
 
-    /* ---- Section ---- */
-    .detail-dialog__section {
+    .section-container {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
 
-    .detail-dialog__section-label {
+    .section-label {
       display: flex;
       align-items: center;
       gap: 6px;
       font-size: 0.75rem;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--color-text-tertiary);
-
-      mat-icon {
-        font-size: 15px;
-        width: 15px;
-        height: 15px;
-      }
+      letter-spacing: 0.05em;
+      color: var(--color-text-tertiary, #64748b);
     }
 
-    .detail-dialog__description {
-      font-size: 0.9rem;
-      line-height: 1.65;
-      color: var(--color-text-secondary);
+    .section-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+
+    .section-card {
+      background: var(--color-background, #f8fafc);
+      border: 1px solid var(--color-border, #e2e8f0);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    [data-theme='dark'] .section-card {
+      background: rgba(15, 23, 42, 0.6);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .task-desc {
+      font-size: 0.9375rem;
+      line-height: 1.6;
+      color: var(--color-text-primary, #334155);
       margin: 0;
-      padding: 14px 16px;
-      background: var(--color-background);
-      border-radius: 10px;
-      border: 1px solid var(--color-border);
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
-    .detail-dialog__description--empty {
+    .task-desc--empty {
       font-style: italic;
-      opacity: 0.55;
+      color: var(--color-text-tertiary, #94a3b8);
     }
 
-    /* ---- Dates ---- */
-    .detail-dialog__dates {
+    .dates-grid {
       display: flex;
       gap: 16px;
       flex-wrap: wrap;
     }
 
-    .detail-dialog__date-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
+    .date-card {
       flex: 1;
-      min-width: 120px;
-      padding: 12px 14px;
-      background: var(--color-background);
-      border-radius: 10px;
-      border: 1px solid var(--color-border);
-
-      mat-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
-        color: var(--color-text-tertiary);
-        margin-top: 2px;
-        flex-shrink: 0;
-      }
+      min-width: 180px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--color-background, #f8fafc);
+      border: 1px solid var(--color-border, #e2e8f0);
+      border-radius: 12px;
+      padding: 14px;
     }
 
-    .detail-dialog__date-body {
+    [data-theme='dark'] .date-card {
+      background: rgba(15, 23, 42, 0.6);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .date-icon-wrapper {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(99, 102, 241, 0.1);
+      color: #6366f1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .date-icon-wrapper mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    .date-info {
       display: flex;
       flex-direction: column;
       gap: 2px;
     }
 
-    .detail-dialog__date-label {
-      font-size: 0.68rem;
-      font-weight: 600;
+    .date-label {
+      font-size: 0.7rem;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      color: var(--color-text-tertiary);
+      color: var(--color-text-tertiary, #64748b);
     }
 
-    .detail-dialog__date-value {
+    .date-value {
       font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--color-text-primary);
+      font-weight: 600;
+      color: var(--color-text-primary, #0f172a);
     }
 
-    /* ---- Actions ---- */
-    .detail-dialog__actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      padding-top: 4px;
+    .date-relative {
+      font-size: 0.75rem;
+      color: var(--color-text-tertiary, #94a3b8);
     }
 
-    .btn-cancel {
-      border-color: var(--color-border) !important;
-      color: var(--color-text-secondary) !important;
-      border-radius: 9999px !important;
+    .dialog-actions {
+      padding: 16px 24px !important;
+      border-top: 1px solid var(--color-border, #e2e8f0);
+      margin: 0 !important;
+      background: var(--color-surface, #ffffff);
     }
 
-    .btn-edit {
-      background: linear-gradient(135deg, #6366f1, #818cf8) !important;
-      color: #fff !important;
-      border-radius: 9999px !important;
-      box-shadow: 0 2px 10px rgba(99,102,241,0.35) !important;
-      gap: 6px;
+    [data-theme='dark'] .dialog-actions {
+      background: #1e293b;
     }
 
-    .btn-edit mat-icon {
-      font-size: 17px !important;
-      width: 17px !important;
-      height: 17px !important;
+    .spacer {
+      flex: 1;
     }
-  `],
+
+    .delete-btn {
+      border-color: #ef4444 !important;
+      color: #ef4444 !important;
+      transition: all 0.2s ease;
+    }
+
+    .delete-btn:hover {
+      background-color: #ef4444 !important;
+      color: #ffffff !important;
+    }
+
+    .edit-btn {
+      border-color: #9333ea !important;
+      color: #9333ea !important;
+      transition: all 0.2s ease;
+    }
+
+    .edit-btn:hover {
+      background-color: #9333ea !important;
+      color: #ffffff !important;
+    }
+  `]
 })
 export class TaskDetailDialogComponent {
   readonly task: Task;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: TaskDetailDialogData,
-    private dialogRef: MatDialogRef<TaskDetailDialogComponent>,
+    private dialogRef: MatDialogRef<TaskDetailDialogComponent, TaskDetailDialogResult>,
   ) {
     this.task = data.task;
   }
 
   close(): void {
     this.dialogRef.close();
+  }
+
+  onDelete(): void {
+    this.dialogRef.close('delete');
   }
 }
